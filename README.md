@@ -1,6 +1,7 @@
 [TOC]
 
 # Mac MySQL使用教程
+> [本文记录在我的GitHub](https://github.com/Thor-jelly/studyMySQL/blob/master/README.md#%E9%80%9A%E9%85%8D%E7%AC%A6)  
 > [记录使用Homebrew安装Mysql全过程](http://blog.csdn.net/lkxlaz/article/details/54580735)  (亲测有效)  
 > [mac安装mysql的两种方法（含配置）](https://www.jianshu.com/p/fd3aae701db9)
 
@@ -19,7 +20,7 @@
 Default options are read from the following files in the given order:
 /etc/my.cnf /etc/mysql/my.cnf /usr/local/etc/my.cnf ~/.my.cnf 
 
-
+//其实上面这个.cnf顺序是MySQL数据库读取配置文件的顺序
 我用homebrew安装的在/usr/local/etc/my.cnf目录下
 ```
 
@@ -136,9 +137,9 @@ CREATE TABLE study001
 
 # 向数据库表中添加数据
 `insert into 数据库表名 values(value值1,value值2,.......);`  
-这种必须创建了几个列就需要传几个值，少一个就会报错(**Column count doesn't match value count at row 1**)，
+这种必须创建了几个列就需要传几个值，少一个就会报错(**Column count doesn't match value count at row 1**)。   
 `insert into 数据库表名 (列名1,列名2,...） values(value值1,value值2,...);`  
-这种可以少传参数，只会赋值那些设置值的字段(前提设置了默认值，如果没有设置也会报错**ERROR 1364 (HY000): Field 'address' doesn't have a default value**)
+这种可以少传参数，只会赋值那些设置值的字段(前提**设置了默认值**或者**没有加not null**，如果没有设置也会报错**ERROR 1364 (HY000): Field 'address' doesn't have a default value**)
 
 ```
 INSERT INTO study001 VALUES(6, '哈哈1', 'nv1', 10, '哈哈1');
@@ -171,13 +172,6 @@ INSERT INTO study001 (name, sex, age, address) VALUES ('天天1', '男1', 111, '
 |_	         |仅替代一个字符|
 |[charlist]	| 字符列中的任何单一字符|
 |[!charlist]或[\^charlist]	  | 不在字符列中的任何单一字符|
-
-
-或者
-
-[!charlist]
-
-不在字符列中的任何单一字符
 
 ## 查询所有数据
 `select * from 表名;`
@@ -247,15 +241,14 @@ INSERT INTO study001 (name, sex, age, address) VALUES ('天天1', '男1', 111, '
 需要用到[常用的操作符](#操作符)
 
 ```
-mysql> select * from study001 where id between '11' and '3';
-+----+------------+------+---------+
-| id | name       | sex  | address |
-+----+------------+------+---------+
-| 11 | 小哈       | 11   | 哈哈    |
-| 2  | 吴冬冬2    | 男2  | 吴国2   |
-| 3  | 吴冬冬2    | 男2  | 吴国2   |
-+----+------------+------+---------+
-3 rows in set (0.00 sec)
+    mysql> select * from study001 where id between '11' and '3';
+    +----+------------+------+---------+
+    | id | name       | sex  | address |
+    +----+------------+------+---------+
+    | 11 | 小哈       | 11   | 哈哈    |
+    | 2  | 吴冬冬2    | 男2  | 吴国2   |
+    | 3  | 吴冬冬2    | 男2  | 吴国2   |
+    +----+------------+------+---------+
 ```
 
 ### [通配符使用](#通配符)
@@ -272,3 +265,181 @@ mysql> select * from study001 where id between '11' and '3';
 ```
 
 # 修改数据表中数据
+`update 表名称 set 列名称 = 新值 where 列名称 = 某值`  
+如果要更新多个列值`update 表名称 set 列名称1 = 新值, 列名称2 = 新值 where 列名称 = 某值`  
+
+```
+    mysql> update study001 set address='吴国吴国' where address='吴国2';
+    Query OK, 3 rows affected (0.01 sec)
+    Rows matched: 3  Changed: 3  Warnings: 0
+    
+    mysql> select * from study001;
+    +----+------------+------+--------------+
+    | id | name       | sex  | address      |
+    +----+------------+------+--------------+
+    | 1  | 吴冬冬     | 男   | 吴国         |
+    | 11 | 小哈       | 11   | 哈哈         |
+    | 2  | 吴冬冬2    | 男2  | 吴国吴国     |
+    | 3  | 吴冬冬2    | 男2  | 吴国吴国     |
+    | 4  | 小火       | 男2  | 吴国吴国     |
+    | 5  | 小男       | 男2  | 吴国1        |
+    +----+------------+------+--------------+
+```
+
+```
+    mysql> update study001 set address='吴国2',sex='男3'  where name='吴冬冬2';
+    Query OK, 2 rows affected (0.01 sec)
+    Rows matched: 2  Changed: 2  Warnings: 0
+    
+    mysql> select * from study001;
+    +----+------------+------+--------------+
+    | id | name       | sex  | address      |
+    +----+------------+------+--------------+
+    | 1  | 吴冬冬     | 男   | 吴国         |
+    | 11 | 小哈       | 11   | 哈哈         |
+    | 2  | 吴冬冬2    | 男3  | 吴国2        |
+    | 3  | 吴冬冬2    | 男3  | 吴国2        |
+    | 4  | 小火       | 男2  | 吴国吴国     |
+    | 5  | 小男       | 男2  | 吴国1        |
+    +----+------------+------+--------------+
+```
+
+# 删除表中数据
+`delete from 数据库表名 where 删除条件;`
+
+```
+mysql> delete from study001 where name='吴冬冬2';
+Query OK, 2 rows affected (0.00 sec)
+
+mysql> select * from study001;
++----+-----------+------+--------------+
+| id | name      | sex  | address      |
++----+-----------+------+--------------+
+| 1  | 吴冬冬    | 男   | 吴国         |
+| 11 | 小哈      | 11   | 哈哈         |
+| 4  | 小火      | 男2  | 吴国吴国     |
+| 5  | 小男      | 男2  | 吴国1        |
++----+-----------+------+--------------+
+```
+
+**如果想直接删除表内所有数据直接输入 `delete from 表名; 等同于 delete * from 表名;` 就可以删除表内所有数据**
+
+# 修改表中column
+
+## 修改表中字段名称
+`alter table 数据库表名 change 列名称 新列名称(如果想改名称就命名不一样的) 新数据类型 [其它];`  
+
+**新数据类型时必须的，不了会报错**  
+
+```
+mysql> alter table study001 change address addr;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+```
+
+```
+    mysql> alter table study001 change address addr char(40) not null;
+    Query OK, 4 rows affected (0.02 sec)
+    Records: 4  Duplicates: 0  Warnings: 0
+    
+    mysql> describe study001;
+    +-------+----------+------+-----+---------+-------+
+    | Field | Type     | Null | Key | Default | Extra |
+    +-------+----------+------+-----+---------+-------+
+    | id    | char(10) | NO   | PRI | NULL    |       |
+    | name  | char(16) | NO   |     | NULL    |       |
+    | sex   | char(6)  | NO   |     | NULL    |       |
+    | addr  | char(40) | NO   |     | NULL    |       |
+    +-------+----------+------+-----+---------+-------+
+```
+
+> **如果只想改变数据类型而不变更名称，也可以调用`alter table 数据库表名 modify 列名称 新数据类型;`**
+
+## 添加字段
+`alter table 表名 add 列名称 数据类型;`
+
+```
+    mysql> alter table study001 add column_name char(20);
+    Query OK, 0 rows affected (0.04 sec)
+    Records: 0  Duplicates: 0  Warnings: 0
+    
+    mysql> alter table study001 add column_name222 int;
+    Query OK, 0 rows affected (0.04 sec)
+    Records: 0  Duplicates: 0  Warnings: 0
+    
+    mysql> describe study001;
+    +----------------+----------+------+-----+---------+-------+
+    | Field          | Type     | Null | Key | Default | Extra |
+    +----------------+----------+------+-----+---------+-------+
+    | id             | char(10) | NO   | PRI | NULL    |       |
+    | name           | char(20) | YES  |     | NULL    |       |
+    | sex            | char(6)  | NO   |     | NULL    |       |
+    | addr           | char(40) | NO   |     | NULL    |       |
+    | column_name    | char(20) | YES  |     | NULL    |       |
+    | column_name222 | int(11)  | YES  |     | NULL    |       |
+    +----------------+----------+------+-----+---------+-------+
+```
+
+## 删除字段
+`alter table 表名 drop column 列名称;`
+
+```
+    mysql> alter table study001 drop column column_name222;
+    mysql> alter table study001 drop column column_name;
+    Query OK, 0 rows affected (0.05 sec)
+    Records: 0  Duplicates: 0  Warnings: 0
+    
+    mysql> describe study001;
+    +-------+----------+------+-----+---------+-------+
+    | Field | Type     | Null | Key | Default | Extra |
+    +-------+----------+------+-----+---------+-------+
+    | id    | char(10) | NO   | PRI | NULL    |       |
+    | name  | char(20) | YES  |     | NULL    |       |
+    | sex   | char(6)  | NO   |     | NULL    |       |
+    | addr  | char(40) | NO   |     | NULL    |       |
+    +-------+----------+------+-----+---------+-------+
+```
+
+## 重命名数据库表名
+`alter table 表名 rename 新表名;`
+
+```
+    mysql> alter table study001 rename study;
+    
+    mysql> show tables;
+    +-----------------------+
+    | Tables_in_study_mysql |
+    +-----------------------+
+    | study                 |
+    +-----------------------+
+```
+## 删除表/数据库
+`drop table 表名;`
+`drop database 数据库名;`
+
+删除表前我先创建了一个study11的表。  
+
+```
+    mysql> show tables;
+    +-----------------------+
+    | Tables_in_study_mysql |
+    +-----------------------+
+    | study                 |
+    | study11               |
+    +-----------------------+
+```
+
+```
+    mysql> drop table study11;
+    Query OK, 0 rows affected (0.01 sec)
+    
+    mysql> show tables;
+    +-----------------------+
+    | Tables_in_study_mysql |
+    +-----------------------+
+    | study                 |
+    +-----------------------+
+```
+
+# 参考文章
+- [30分钟带你快速入门MySQL教程](https://yq.aliyun.com/articles/40771)
+- [SQL 教程](http://www.w3school.com.cn/sql/index.asp)
